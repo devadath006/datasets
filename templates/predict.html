@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Price Benchmarking System - Predict Price</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+        }
+        
+        .navbar {
+            background: #1a237e;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .navbar h1 {
+            font-size: 20px;
+        }
+        
+        .navbar .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+        
+        .navbar a:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        
+        .card h2 {
+            color: #1a237e;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            color: #666;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            color: #1a237e;
+            border-bottom: 2px solid #1a237e;
+        }
+        
+        .tab:hover {
+            background: #f5f5f5;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #1a237e;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            background: #1a237e;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .btn:hover {
+            background: #0d47a1;
+        }
+        
+        .form-container {
+            display: none;
+        }
+        
+        .form-container.active {
+            display: block;
+        }
+        
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #1a237e;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 0 4px 4px 0;
+        }
+        
+        .info-box p {
+            color: #333;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <h1>Price Benchmarking System</h1>
+        <div class="user-info">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/trends">Market Trends</a>
+            <a href="/history">History</a>
+            <a href="/logout">Logout</a>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <div class="card">
+            <h2>Price Prediction</h2>
+            
+            <div class="info-box">
+                <p>Enter the product or service details to get AI-powered price predictions based on market data and historical trends.</p>
+            </div>
+            
+            <div class="tabs">
+                <div class="tab active" onclick="showTab('product')">Product</div>
+                <div class="tab" onclick="showTab('service')">Service</div>
+            </div>
+            
+            <form method="POST" action="/predict">
+                <div id="product-form" class="form-container active">
+                    <input type="hidden" name="query_type" value="product">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Category</label>
+                            <select name="category" id="product-category" onchange="updateProductItems()" required>
+                                <option value="">Select Category</option>
+                                {% for cat in product_items.keys() %}
+                                <option value="{{ cat }}">{{ cat }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Item Name</label>
+                            <select name="item_name" id="product-item" required>
+                                <option value="">Select Category First</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Vendor Tier</label>
+                            <select name="vendor_tier">
+                                <option value="Tier 1">Tier 1 (Premium)</option>
+                                <option value="Tier 2" selected>Tier 2 (Standard)</option>
+                                <option value="Tier 3">Tier 3 (Economy)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Location</label>
+                            <select name="location" required>
+                                <option value="">Select Location</option>
+                                <option value="Delhi">Delhi</option>
+                                <option value="Mumbai">Mumbai</option>
+                                <option value="Bangalore">Bangalore</option>
+                                <option value="Chennai">Chennai</option>
+                                <option value="Kolkata">Kolkata</option>
+                                <option value="Hyderabad">Hyderabad</option>
+                                <option value="Pune">Pune</option>
+                                <option value="Ahmedabad">Ahmedabad</option>
+                                <option value="Jaipur">Jaipur</option>
+                                <option value="Lucknow">Lucknow</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Source</label>
+                            <select name="source">
+                                <option value="GeM Portal">GeM Portal</option>
+                                <option value="Central Public Procurement Portal">CPP Portal</option>
+                                <option value="Vendor Quotation">Vendor Quotation</option>
+                                <option value="Previous Purchase Order">Previous PO</option>
+                                <option value="Industry Report">Industry Report</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Quantity</label>
+                            <input type="number" name="quantity" value="1" min="1" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Warranty (Years)</label>
+                            <select name="warranty_years">
+                                <option value="1">1 Year</option>
+                                <option value="2">2 Years</option>
+                                <option value="3" selected>3 Years</option>
+                                <option value="5">5 Years</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Expected Delivery (Days)</label>
+                            <input type="number" name="delivery_days" value="14" min="1" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="service-form" class="form-container">
+                    <input type="hidden" name="query_type" value="service">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Category</label>
+                            <select name="category" id="service-category" onchange="updateServiceItems()" required>
+                                <option value="">Select Category</option>
+                                {% for cat in service_items.keys() %}
+                                <option value="{{ cat }}">{{ cat }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Service Name</label>
+                            <select name="service_name" id="service-item" required>
+                                <option value="">Select Category First</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Location</label>
+                            <select name="location" required>
+                                <option value="">Select Location</option>
+                                <option value="Delhi">Delhi</option>
+                                <option value="Mumbai">Mumbai</option>
+                                <option value="Bangalore">Bangalore</option>
+                                <option value="Chennai">Chennai</option>
+                                <option value="Kolkata">Kolkata</option>
+                                <option value="Hyderabad">Hyderabad</option>
+                                <option value="Pune">Pune</option>
+                                <option value="Ahmedabad">Ahmedabad</option>
+                                <option value="Jaipur">Jaipur</option>
+                                <option value="Lucknow">Lucknow</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Source</label>
+                            <select name="source">
+                                <option value="Vendor Quotation">Vendor Quotation</option>
+                                <option value="GeM Portal">GeM Portal</option>
+                                <option value="Tender Document">Tender Document</option>
+                                <option value="Industry Report">Industry Report</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Duration (Months)</label>
+                        <select name="duration_months">
+                            <option value="1">1 Month</option>
+                            <option value="3">3 Months</option>
+                            <option value="6">6 Months</option>
+                            <option value="12" selected>12 Months</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn">Get Price Prediction</button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        const productItems = {{ product_items | tojson }};
+        const serviceItems = {{ service_items | tojson }};
+        
+        function showTab(type) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.form-container').forEach(form => form.classList.remove('active'));
+            
+            if (type === 'product') {
+                document.querySelector('.tab:first-child').classList.add('active');
+                document.getElementById('product-form').classList.add('active');
+            } else {
+                document.querySelector('.tab:last-child').classList.add('active');
+                document.getElementById('service-form').classList.add('active');
+            }
+        }
+        
+        function updateProductItems() {
+            const category = document.getElementById('product-category').value;
+            const itemSelect = document.getElementById('product-item');
+            
+            itemSelect.innerHTML = '<option value="">Select Item</option>';
+            
+            if (category && productItems[category]) {
+                productItems[category].forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item;
+                    option.textContent = item;
+                    itemSelect.appendChild(option);
+                });
+            }
+        }
+        
+        function updateServiceItems() {
+            const category = document.getElementById('service-category').value;
+            const itemSelect = document.getElementById('service-item');
+            
+            itemSelect.innerHTML = '<option value="">Select Service</option>';
+            
+            if (category && serviceItems[category]) {
+                serviceItems[category].forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item;
+                    option.textContent = item;
+                    itemSelect.appendChild(option);
+                });
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Price Benchmarking System - Market Trends</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+        }
+        
+        .navbar {
+            background: #1a237e;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .navbar h1 {
+            font-size: 20px;
+        }
+        
+        .navbar .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+        
+        .navbar a:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        
+        .card h2 {
+            color: #1a237e;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .trends-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        
+        .trend-card {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        
+        .trend-card h3 {
+            color: #1a237e;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .trend-item {
+            padding: 12px;
+            background: white;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        
+        .trend-item .title {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .trend-item .details {
+            display: flex;
+            justify-content: space-between;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .trend-item .price {
+            color: #1a237e;
+            font-weight: 500;
+        }
+        
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .stat-box {
+            flex: 1;
+            min-width: 150px;
+            background: white;
+            padding: 15px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        .stat-box .label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+        }
+        
+        .stat-box .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1a237e;
+            margin-top: 5px;
+        }
+        
+        .actions {
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            background: #1a237e;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: background 0.3s;
+        }
+        
+        .btn:hover {
+            background: #0d47a1;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <h1>Price Benchmarking System</h1>
+        <div class="user-info">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/predict">Predict Price</a>
+            <a href="/logout">Logout</a>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <div class="card">
+            <h2>Market Trends & Analytics</h2>
+            
+            <div class="stats-row">
+                <div class="stat-box">
+                    <div class="label">Total Categories</div>
+                    <div class="value">{{ trends.category_trends|length }}</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">Locations Analyzed</div>
+                    <div class="value">{{ trends.location_analysis|length }}</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">Vendors Tracked</div>
+                    <div class="value">{{ trends.vendor_analysis|length }}</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="trends-grid">
+            <div class="card">
+                <h2>Category Analysis</h2>
+                {% for category, data in trends.category_trends.items() %}
+                <div class="trend-card">
+                    <h3>{{ category }}</h3>
+                    <div class="trend-item">
+                        <div class="title">Average Price</div>
+                        <div class="details">
+                            <span>₹{{ "{:,.2f}".format(data.avg_price) }}</span>
+                            <span>{{ data.total_entries }} entries</span>
+                        </div>
+                    </div>
+                    <div class="trend-item">
+                        <div class="title">Price Range</div>
+                        <div class="details">
+                            <span>₹{{ "{:,.2f}".format(data.price_range.min) }} - ₹{{ "{:,.2f}".format(data.price_range.max) }}</span>
+                        </div>
+                    </div>
+                    <div class="trend-item">
+                        <div class="title">Top Vendors</div>
+                        <div class="details">
+                            <span>{{ data.top_vendors.keys()|list|join(', ') }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="card">
+                <h2>Location Analysis</h2>
+                {% for location, data in trends.location_analysis.items() %}
+                <div class="trend-card">
+                    <h3>{{ location }}</h3>
+                    <div class="trend-item">
+                        <div class="details">
+                            <span>Average Price</span>
+                            <span class="price">₹{{ "{:,.2f}".format(data.avg_price) }}</span>
+                        </div>
+                    </div>
+                    <div class="trend-item">
+                        <div class="details">
+                            <span>Total Procurements</span>
+                            <span>{{ data.total_procurements }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="card">
+                <h2>Vendor Analysis</h2>
+                {% for vendor, data in trends.vendor_analysis.items() %}
+                <div class="trend-card">
+                    <h3>{{ vendor }}</h3>
+                    <div class="trend-item">
+                        <div class="details">
+                            <span>Average Price</span>
+                            <span class="price">₹{{ "{:,.2f}".format(data.avg_price) }}</span>
+                        </div>
+                    </div>
+                    <div class="trend-item">
+                        <div class="details">
+                            <span>Total Entries</span>
+                            <span>{{ data.total_entries }}</span>
+                        </div>
+                    </div>
+                    <div class="trend-item">
+                        <div class="details">
+                            <span>Avg Quality Rating</span>
+                            <span>{{ data.avg_quality }}/5.0</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="actions">
+            <a href="/predict" class="btn">Get Price Prediction</a>
+            <a href="/dashboard" class="btn">Back to Dashboard</a>
+        </div>
+    </div>
+</body>
+</html>
